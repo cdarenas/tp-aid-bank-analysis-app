@@ -1,2 +1,3 @@
-# tp-aid-bank-analysis-app
-Aplicación web caso de estudio Bank X - Abandono de Clientes
+# Tarea 2
+
+Repo con el enunciado y los materiales para la entrega de la segunda tarea en **Análisis Inteligente de Datos**.
