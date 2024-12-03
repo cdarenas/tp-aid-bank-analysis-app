@@ -1,9 +1,9 @@
-#  █████╗ ██╗██████╗       ████████╗██████╗      
+#  █████╗ ██╗██████╗       ████████╗██████╗
 # ██╔══██╗██║██╔══██╗      ╚══██╔══╝██╔══██╗
 # ███████║██║██║  ██║         ██║   ██████╔╝
-# ██╔══██║██║██║  ██║         ██║   ██╔═══╝ 
-# ██║  ██║██║██████╔╝         ██║   ██║     
-# ╚═╝  ╚═╝╚═╝╚═════╝          ╚═╝   ╚═╝        
+# ██╔══██║██║██║  ██║         ██║   ██╔═══╝
+# ██║  ██║██║██████╔╝         ██║   ██║
+# ╚═╝  ╚═╝╚═╝╚═════╝          ╚═╝   ╚═╝
 # Descripción: Script para AID - TP2.
 # Este script realiza análisis de datos avanzados con visualización y estadísticas.
 # Autor: Cristian D. Arenas
@@ -39,7 +39,7 @@ def show_init_page():
         df = pd.read_csv(data_file)
 
         st.subheader("Exploración del dataset")
-        #st.dataframe(df)
+        # st.dataframe(df)
         st.write('Primeras 10 filas del DataFrame:')
         st.dataframe(df.head(10), use_container_width=True)
 
@@ -60,7 +60,8 @@ def show_init_page():
         missing_data = df.isnull().sum()
 
         # Creao un DataFrame para visualizarlo mejor
-        missing_data_df = pd.DataFrame(missing_data, columns=['Datos Faltantes'])
+        missing_data_df = pd.DataFrame(
+            missing_data, columns=['Datos Faltantes'])
         # Filtro solo columnas con datos faltantes
         missing_data_df = missing_data_df[missing_data_df['Datos Faltantes'] > 0]
 
@@ -70,7 +71,7 @@ def show_init_page():
 
         # Selección de la estrategia de imputación
         method = st.selectbox("Selecciona el método para manejar los datos faltantes:",
-                          ("Eliminar filas", "Media", "Mediana", "Moda", "Valor fijo"))
+                              ("Eliminar filas", "Media", "Mediana", "Moda", "Valor fijo"))
 
         if method == "Eliminar filas":
             # Elimina filas con cualquier valor faltante
@@ -82,26 +83,31 @@ def show_init_page():
             for col in df.select_dtypes(include='number').columns:
                 mean_value = df[col].mean()
                 df[col] = df[col].fillna(mean_value)
-            st.write("Valores faltantes reemplazados por la media de cada columna numérica.")
+            st.write(
+                "Valores faltantes reemplazados por la media de cada columna numérica.")
         elif method == "Mediana":
             # Imputación con la mediana
             # Solo columnas numéricas
             for col in df.select_dtypes(include='number').columns:
                 median_value = df[col].median()
                 df[col] = df[col].fillna(median_value)
-            st.write("Valores faltantes reemplazados por la mediana de cada columna numérica.")
+            st.write(
+                "Valores faltantes reemplazados por la mediana de cada columna numérica.")
         elif method == "Moda":
             # Imputación con la moda
             for col in df.columns:
-                mode_value = df[col].mode()[0]  # Obtener la moda de cada columna
+                # Obtener la moda de cada columna
+                mode_value = df[col].mode()[0]
                 df[col] = df[col].fillna(mode_value)
             st.write("Valores faltantes reemplazados por la moda de cada columna.")
         elif method == "Valor fijo":
             # Imputación con un valor fijo, ingresado por el usuario
-            fixed_value = st.text_input("Ingresa el valor fijo para reemplazar los valores faltantes:")
+            fixed_value = st.text_input(
+                "Ingresa el valor fijo para reemplazar los valores faltantes:")
             if fixed_value:
                 df = df.fillna(fixed_value)
-                st.write(f"Valores faltantes reemplazados por el valor fijo: {fixed_value}")
+                st.write(f"Valores faltantes reemplazados por el valor fijo: {
+                         fixed_value}")
 
         # Permito eliminar del dataframe los registros de países que no me interesen para el análisis
         # Obtener un vector con los países sin repetir
@@ -123,117 +129,126 @@ def show_init_page():
 def show_exploration_page():
     df = st.session_state.dataframe
 
-    st.success("Descripción analítica del conjunto de datos:")
+    if df is not None:
+        st.success("Descripción analítica del conjunto de datos:")
 
-    # Descripción analítica del conjunto de datos
-    df_describe = df.drop(columns=['CustomerId']).describe()
-    st.dataframe(df_describe, use_container_width=True)
+        # Descripción analítica del conjunto de datos
+        df_describe = df.drop(columns=['CustomerId']).describe()
+        st.dataframe(df_describe, use_container_width=True)
 
-    st.markdown("<h2 style='font-size:16px;'>Distribución de clientes según su nivel crediticio</h2>", unsafe_allow_html=True)
-    # Calcular los cuartiles del nivel crediticio
-    st.write("La mayoría de los clientes tienen un nivel crediticio entre 584 y 718, por lo tanto la distribución de niveles crediticios está concentrada en este rango. Esto sugiere una cartera de clientes con un nivel de crédito relativamente moderado. Un 25% se encuentra por debajo de ese rango, con un puntaje bajo y sólo un 25% de los clientes posee un puntaje alto (718+).")
+        st.markdown("<h2 style='font-size:16px;'>Distribución de clientes según su nivel crediticio</h2>",
+                unsafe_allow_html=True)
+        # Calcular los cuartiles del nivel crediticio
+        st.write("La mayoría de los clientes tienen un nivel crediticio entre 584 y 718, por lo tanto la distribución de niveles crediticios está concentrada en este rango. Esto sugiere una cartera de clientes con un nivel de crédito relativamente moderado. Un 25% se encuentra por debajo de ese rango, con un puntaje bajo y sólo un 25% de los clientes posee un puntaje alto (718+).")
 
-    # Histograma de la distribución de edades
-    fig = px.histogram(df, x='Age', nbins=10, title='Distribución de las edades')
-    fig.update_traces(marker=dict(line=dict(color='black', width=1)))
-    st.plotly_chart(fig)
+        # Histograma de la distribución de edades
+        fig = px.histogram(df, x='Age', nbins=10,
+                       title='Distribución de las edades')
+        fig.update_traces(marker=dict(line=dict(color='black', width=1)))
+        st.plotly_chart(fig)
 
-    st.write("Se puede apreciar que la distribución de edades presenta una asimetría positiva (hacia la derecha), con una mayor concentración de clientes adultos jóvenes y una cola que se extiende hacia edades más avanzadas.")
-    st.write("La edad promedio de los clientes es de 39 años y la mediana se ubica en 37 años lo que nos indica que hay una distribución relativamente asimétrica, con un 50% de clientes por debajo de los 37 años y un 50% por encima de los 37 años.")
+        st.write("Se puede apreciar que la distribución de edades presenta una asimetría positiva (hacia la derecha), con una mayor concentración de clientes adultos jóvenes y una cola que se extiende hacia edades más avanzadas.")
+        st.write("La edad promedio de los clientes es de 39 años y la mediana se ubica en 37 años lo que nos indica que hay una distribución relativamente asimétrica, con un 50% de clientes por debajo de los 37 años y un 50% por encima de los 37 años.")
 
-    # Gráfico de barras de la distribución por país
-    fig = px.bar(df, x='Geography', title='Distribución por país')
-    st.plotly_chart(fig)
+        # Gráfico de barras de la distribución por país
+        fig = px.bar(df, x='Geography', title='Distribución por país')
+        st.plotly_chart(fig)
 
-    st.write("Se puede observar que Francia es el país con mayor frecuencia de clientes del banco; aproximadamente el 50% de los clientes totales del banco pertenecen a este país y la otra mitad está concentrada entre España y Alemania.")
+        st.write("Se puede observar que Francia es el país con mayor frecuencia de clientes del banco; aproximadamente el 50% de los clientes totales del banco pertenecen a este país y la otra mitad está concentrada entre España y Alemania.")
 
-    cantidades = df['Gender'].value_counts()
-    df_cantidades = cantidades.reset_index()
-    df_cantidades.columns = ['Gender', 'Count']
+        cantidades = df['Gender'].value_counts()
+        df_cantidades = cantidades.reset_index()
+        df_cantidades.columns = ['Gender', 'Count']
 
-    # Crear el gráfico de sectores (pie chart) con Plotly Express
-    fig = px.pie(df_cantidades, 
-             names='Gender',  # Columna para las categorías
-             values='Count',  # Columna con los valores
-             color='Gender',  # Columna para asignar colores
-             title="Distribución de Género de los Clientes",
-             color_discrete_map={"Male": "royalblue", "Female": "lightpink"},  # Colores personalizados
-             hole=0.3)
+        # Crear el gráfico de sectores (pie chart) con Plotly Express
+        fig = px.pie(df_cantidades,
+                 names='Gender',  # Columna para las categorías
+                 values='Count',  # Columna con los valores
+                 color='Gender',  # Columna para asignar colores
+                 title="Distribución de Género de los Clientes",
+                 # Colores personalizados
+                 color_discrete_map={
+                     "Male": "royalblue", "Female": "lightpink"},
+                 hole=0.3)
 
-    # Mostrar el gráfico en Streamlit
-    st.plotly_chart(fig)
+        # Mostrar el gráfico en Streamlit
+        st.plotly_chart(fig)
 
-    st.write("Respecto de la distribución del género dentro del conjunto de clientes del banco, el 54.6% son hombres, podemos decir que no hay una diferencia significativa entre hombres y mujeres.")
+        st.write("Respecto de la distribución del género dentro del conjunto de clientes del banco, el 54.6% son hombres, podemos decir que no hay una diferencia significativa entre hombres y mujeres.")
 
-    # Gráfico de cajas de Saldo por país
-    fig = px.box(df, x='Geography', y='Balance', title='Saldo en cuenta por país')
-    st.plotly_chart(fig)
+        # Gráfico de cajas de Saldo por país
+        fig = px.box(df, x='Geography', y='Balance',
+                 title='Saldo en cuenta por país')
+        st.plotly_chart(fig)
 
-    st.write("Respecto de la distribución de saldo en cuenta por país, podemos observar que para los casos de España y Francia, la mediana es de aproximadamente 62.000 Euros y ambos países de acuerdo al Rango Intercuartílico, tienen una variabilidad más alta en los saldos que para el caso de Alemania. Para este último país, la variabilidad es menor y la mayor concentración se da en el rango de 103.000 y 137.000 Euros.")
-    st.write("Estas diferencias de medias entre los países puede deberse a niveles de ingreso más elevados en unos países que en otros.")
-    st.write("Para entender si los salarios promedio de cada país tienen impacto en los saldos, calculamos saldo y salario estimado promedio por país y graficamos los resultados.")
+        st.write("Respecto de la distribución de saldo en cuenta por país, podemos observar que para los casos de España y Francia, la mediana es de aproximadamente 62.000 Euros y ambos países de acuerdo al Rango Intercuartílico, tienen una variabilidad más alta en los saldos que para el caso de Alemania. Para este último país, la variabilidad es menor y la mayor concentración se da en el rango de 103.000 y 137.000 Euros.")
+        st.write("Estas diferencias de medias entre los países puede deberse a niveles de ingreso más elevados en unos países que en otros.")
+        st.write("Para entender si los salarios promedio de cada país tienen impacto en los saldos, calculamos saldo y salario estimado promedio por país y graficamos los resultados.")
 
-    # Calcular saldo y salario promedio por país
-    saldo_pais = df.groupby("Geography")["Balance"].mean()
-    salario_pais = df.groupby("Geography")["EstimatedSalary"].mean()
+        # Calcular saldo y salario promedio por país
+        saldo_pais = df.groupby("Geography")["Balance"].mean()
+        salario_pais = df.groupby("Geography")["EstimatedSalary"].mean()
 
-    comparacion_df = pd.DataFrame({
-    "Saldo Promedio": saldo_pais,
-    "Salario Promedio": salario_pais
-    })
+        comparacion_df = pd.DataFrame({
+            "Saldo Promedio": saldo_pais,
+            "Salario Promedio": salario_pais
+        })
 
-    # Crear gráfico de barras agrupadas
-    fig = px.bar(comparacion_df.reset_index(), 
-             x="Geography", 
-             y=["Saldo Promedio", "Salario Promedio"],
-             title="Comparación de Saldo y Salario Promedio por País",
-             barmode="group",
-             labels={"value": "Monto", "variable": "Métrica"},
-             color_discrete_map={"Saldo Promedio": "#1f77b4", "Salario Promedio": "lightgreen"})
+        # Crear gráfico de barras agrupadas
+        fig = px.bar(comparacion_df.reset_index(),
+                 x="Geography",
+                 y=["Saldo Promedio", "Salario Promedio"],
+                 title="Comparación de Saldo y Salario Promedio por País",
+                 barmode="group",
+                 labels={"value": "Monto", "variable": "Métrica"},
+                 color_discrete_map={"Saldo Promedio": "#1f77b4", "Salario Promedio": "lightgreen"})
 
-    st.plotly_chart(fig)
+        st.plotly_chart(fig)
 
-    st.write("Como podemos apreciar, los salarios promedios en los tres países son similares y sólo el saldo en cuenta promedio en Alemania (120.000) difiere de los otros dos países, los cuales tienen promedios similares cercanos a los 60.000 Euros.")
-    st.write("La distribución de frecuencias podría sugerir que en Alemania los clientes podrían inclinarse hacia la acumulación de dinero en sus cuentas para ahorro u otros fines.")
-    
-    # Análisis gráfico de CreditScore según Gender
-    fig = px.box(df, x='Gender', y='CreditScore', title='Nivel crediticio por género')
-    st.plotly_chart(fig)
+        st.write("Como podemos apreciar, los salarios promedios en los tres países son similares y sólo el saldo en cuenta promedio en Alemania (120.000) difiere de los otros dos países, los cuales tienen promedios similares cercanos a los 60.000 Euros.")
+        st.write("La distribución de frecuencias podría sugerir que en Alemania los clientes podrían inclinarse hacia la acumulación de dinero en sus cuentas para ahorro u otros fines.")
 
-    st.write("En relación a la distribución del puntaje de crédito por género, el gráfico sugiere cierta simetría de los datos, medias similares para ambos grupos, con similar variabilidad de los datos. La mediana para el grupo femenino es de 652 y para el caso de los hombres es de 651.")
+        # Análisis gráfico de CreditScore según Gender
+        fig = px.box(df, x='Gender', y='CreditScore',
+                 title='Nivel crediticio por género')
+        st.plotly_chart(fig)
 
-    # Crear una nueva columna en el DataFrame para agrupar la edad en intervalos de clase
-    df['Age_Group'] = pd.cut(df['Age'], bins=[18, 30, 40, 50, 60, 70, 80], 
-                         labels=["18-30", "31-40", "41-50", "51-60", "61-70", "71-80"])
+        st.write("En relación a la distribución del puntaje de crédito por género, el gráfico sugiere cierta simetría de los datos, medias similares para ambos grupos, con similar variabilidad de los datos. La mediana para el grupo femenino es de 652 y para el caso de los hombres es de 651.")
 
-    # Crear el box plot
-    fig = px.box(df, 
-             x="Age_Group", 
-             y="Balance", 
-             title="Distribución de Saldo por Grupos de Edad",
-             labels={"Age_Group": "Grupo de Edad", "Balance": "Saldo"},
-             color="Age_Group",  # Asigna colores a cada grupo de edad para diferenciarlos
-             points=False)  # Incluye todos los puntos de datos para ver posibles valores atípicos
+        # Crear una nueva columna en el DataFrame para agrupar la edad en intervalos de clase
+        df['Age_Group'] = pd.cut(df['Age'], bins=[18, 30, 40, 50, 60, 70, 80],
+                             labels=["18-30", "31-40", "41-50", "51-60", "61-70", "71-80"])
 
-    # Mostrar el gráfico en Streamlit
-    st.plotly_chart(fig)
+        # Crear el box plot
+        fig = px.box(df,
+                 x="Age_Group",
+                 y="Balance",
+                 title="Distribución de Saldo por Grupos de Edad",
+                 labels={"Age_Group": "Grupo de Edad", "Balance": "Saldo"},
+                 color="Age_Group",  # Asigna colores a cada grupo de edad para diferenciarlos
+                 points=False)  # Incluye todos los puntos de datos para ver posibles valores atípicos
 
-    st.write("En el boxplot podemos apreciar que todos los intervalos de clase o grupos de edades poseen una dispersión en sus saldos muy similar. La asimetría negativa de las cajas, nos da la idea de que la mayoría de los clientes mantienen saldos por debajo de los 100.000 Euros y una pequeña parte por encima de los 100.000 Euros. Para los casos de los grupos de 31-40 y de 51-60 años, se aprecia una mayor dispersión de datos, con saldos acumulados más extremos sugeridos por sus rangos de valores.")
-    
+        # Mostrar el gráfico en Streamlit
+        st.plotly_chart(fig)
+
+        st.write("En el boxplot podemos apreciar que todos los intervalos de clase o grupos de edades poseen una dispersión en sus saldos muy similar. La asimetría negativa de las cajas, nos da la idea de que la mayoría de los clientes mantienen saldos por debajo de los 100.000 Euros y una pequeña parte por encima de los 100.000 Euros. Para los casos de los grupos de 31-40 y de 51-60 años, se aprecia una mayor dispersión de datos, con saldos acumulados más extremos sugeridos por sus rangos de valores.")
+
 
 def show_analysis_page():
     df = st.session_state.dataframe
     if st.session_state.data_file is not None:
         st.success("Análisis del conjunto de datos:")
         # Agrupar por Género y Geografía y calcular la tasa de abandono
-        tasa_abandono = df.groupby(['Gender', 'Geography'])['Exited'].mean() * 100
+        tasa_abandono = df.groupby(['Gender', 'Geography'])[
+            'Exited'].mean() * 100
         # Convertir el resultado a un DataFrame
         tasa_abandono_df = tasa_abandono.reset_index()
 
         # Renombrar las columnas (cabeceras personalizadas)
         tasa_abandono_df.columns = ['Género', 'País', 'Tasa de Abandono (%)']
         # Ordenar las filas por 'Tasa de Abandono (%)' de forma descendente
-        tasa_abandono_df = tasa_abandono_df.sort_values(by='Tasa de Abandono (%)', ascending=False)
+        tasa_abandono_df = tasa_abandono_df.sort_values(
+            by='Tasa de Abandono (%)', ascending=False)
         st.dataframe(tasa_abandono_df)
 
         st.write("Como podemos apreciar en la tabla, Alemania tiene las tasas de abandono de clientes más altas, en primer lugar las mujeres con un 37.55% y luego hombres con un 27.81%. Podemos concluir que el banco posee las tasas más altas de abandono concentradas en el género femenino, por lo tanto se podría trabajar en estrategias orientadas a esté grupo. Por otra parte también orientar acciones en el mercado Alemán con el objetivo de reducir la tasa de abandono en general.")
@@ -243,7 +258,7 @@ def show_analysis_page():
 
         # Crear un histograma con Plotly Express
         fig_hist = px.histogram(df, x="Age", color="Exited", nbins=20,
-                        labels={"Age": "Edad", "Exited": "Abandonó (Exited)"})
+                                labels={"Age": "Edad", "Exited": "Abandonó (Exited)"})
         fig_hist.update_traces(marker=dict(line=dict(color='black', width=1)))
         st.plotly_chart(fig_hist)
 
@@ -258,7 +273,8 @@ def show_analysis_page():
         salarios_no_abandonaron = df[df['Exited'] == 0]['EstimatedSalary']
 
         # Realizar la prueba t de Student para muestras independientes
-        t_stat, p_value = stats.ttest_ind(salarios_abandonaron, salarios_no_abandonaron, alternative='less')
+        t_stat, p_value = stats.ttest_ind(
+            salarios_abandonaron, salarios_no_abandonaron, alternative='less')
 
         # Mostrar los resultados de la prueba
         st.write("Estadístico t:", t_stat)
@@ -284,15 +300,19 @@ def show_logistic_regression():
         st.write(df.head())
         # Seleccionar características y objetivo
         st.sidebar.subheader("Seleccionar columnas")
-        features = st.sidebar.multiselect("Selecciona las columnas de características (X)", df.columns)
-        st.success("Para la variable independiente (y) el modelo trabajará con 'Exited' (Abandono)")
+        features = st.sidebar.multiselect(
+            "Selecciona las columnas de características (X)", df.columns)
+        st.success(
+            "Para la variable independiente (y) el modelo trabajará con 'Exited' (Abandono)")
         if features:
             X = df[features].values
             y = df.iloc[:, 12].values
             original_indices = df['OriginalIndex'].values  # Índices originales
             # División en conjunto de entrenamiento y prueba
-            test_size = st.radio("Selecciona el porcentaje para Test", [0.1, 0.2, 0.3])
-            X_train, X_test, y_train, y_test, indices_train, indices_test = train_test_split(X, y, original_indices, test_size = test_size, random_state = 0)
+            test_size = st.radio(
+                "Selecciona el porcentaje para Test", [0.1, 0.2, 0.3])
+            X_train, X_test, y_train, y_test, indices_train, indices_test = train_test_split(
+                X, y, original_indices, test_size=test_size, random_state=0)
             # Escalado de variables
             sc_X = StandardScaler()
             X_train = sc_X.fit_transform(X_train)
@@ -300,10 +320,10 @@ def show_logistic_regression():
             # Entrenar modelo de regresión logística
             st.sidebar.subheader("Entrenar modelo")
             if st.sidebar.button("Entrenar"):
-                classifier = LogisticRegression(random_state = 0)
+                classifier = LogisticRegression(random_state=0)
                 classifier.fit(X_train, y_train)
                 # Predicción de los resultados con el Conjunto de Testing
-                y_pred  = classifier.predict(X_test)
+                y_pred = classifier.predict(X_test)
                 # Mostramos resultados del modelo
                 st.subheader("Resultados del modelo")
                 # Matriz de confusión
@@ -314,17 +334,19 @@ def show_logistic_regression():
                 st.text(classification_report(y_test, y_pred))
                 # Visualizar la matriz de confusión
                 st.subheader("Gráfico de la matriz de confusión:")
-                cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classifier.classes_)
+                cm_display = ConfusionMatrixDisplay(
+                    confusion_matrix=cm, display_labels=classifier.classes_)
                 fig, ax = plt.subplots(figsize=(5, 5))
                 cm_display.plot(cmap="Blues", ax=ax)
                 fig.patch.set_alpha(0.0)
                 ax.set_facecolor('none')
-                 # Cambiar color de las etiquetas a blanco o amarillo
+                # Cambiar color de las etiquetas a blanco o amarillo
                 ax.xaxis.label.set_color('white')
                 ax.yaxis.label.set_color('white')
-                ax.tick_params(axis='both', colors='white')  # Color de las etiquetas de los ejes
+                # Color de las etiquetas de los ejes
+                ax.tick_params(axis='both', colors='white')
                 for label in ax.get_xticklabels() + ax.get_yticklabels():
-                    label.set_color('yellow') 
+                    label.set_color('yellow')
                 st.pyplot(fig)
                 # Mostrar predicciones con índices originales
                 st.subheader("Predicciones")
@@ -345,7 +367,8 @@ def main():
         st.session_state.dataframe = None
 
     st.sidebar.success("Menu")
-    menu = ["🏠 Inicio", "📝 Descipción de datos", "📊 Análisis", "🧠 Regresión Logística", "Acerca de..."]
+    menu = ["🏠 Inicio", "📝 Descipción de datos",
+            "📊 Análisis", "🧠 Regresión Logística", "Acerca de..."]
     selected_option = st.sidebar.selectbox("Opciones", menu)
 
     if selected_option == "🏠 Inicio":
@@ -371,7 +394,8 @@ def main():
         st.subheader("Análisis de Datos - Abandono de Clientes")
         show_analysis_page()
     elif selected_option == "🧠 Regresión Logística":
-        st.subheader("Regresión Logística - Entrenamiento para predicción de abandono")
+        st.subheader(
+            "Regresión Logística - Entrenamiento para predicción de abandono")
         show_logistic_regression()
     else:
         st.subheader("Acerca de...")
