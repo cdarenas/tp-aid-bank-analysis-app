@@ -180,6 +180,7 @@ def show_exploration_page():
                 popup=f"{row['País']}: {row['Cantidad de Clientes']} clientes",
                 tooltip=row['País']
             ).add_to(mapa)
+            folium.CircleMarker(location=[row['Latitud'], row['Longitud']],radius=100, fill_color='blue').add_to(mapa)
 
         st.subheader("Mapa Interactivo")
         st_folium(mapa, width=700, height=500)
