@@ -16,6 +16,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+import folium
+from streamlit_folium import st_folium
 
 import plotly.express as px
 from sklearn.model_selection import train_test_split
@@ -153,6 +155,34 @@ def show_exploration_page():
         # Gráfico de barras de la distribución por país
         fig = px.bar(df, x='Geography', title='Distribución por país')
         st.plotly_chart(fig)
+
+        # Crear Mapa de visualización
+        clientes_por_pais = df['Geography'].value_counts().reset_index()
+        clientes_por_pais.columns = ['País', 'Cantidad de Clientes']
+
+        coordenadas_paises = {
+            'Spain': {'lat': 40.4637, 'lon': -3.7492},
+            'France': {'lat': 46.6034, 'lon': 1.8883},
+            'Germany': {'lat': 51.1657, 'lon': 10.4515}
+        }
+
+        clientes_por_pais['Latitud'] = clientes_por_pais['País'].map(lambda x: coordenadas_paises[x]['lat'])
+        clientes_por_pais['Longitud'] = clientes_por_pais['País'].map(lambda x: coordenadas_paises[x]['lon'])
+
+        st.subheader("Datos de Clientes por País")
+        st.dataframe(clientes_por_pais)
+
+        mapa = folium.Map(location=[46.6034, 1.8883], zoom_start=5)
+
+        for _, row in clientes_por_pais.iterrows():
+            folium.Marker(
+                location=[row['Latitud'], row['Longitud']],
+                popup=f"{row['País']}: {row['Cantidad de Clientes']} clientes",
+                tooltip=row['País']
+            ).add_to(mapa)
+
+        st.subheader("Mapa Interactivo")
+        st_folium(mapa, width=700, height=500)
 
         st.write("Se puede observar que Francia es el país con mayor frecuencia de clientes del banco; aproximadamente el 50% de los clientes totales del banco pertenecen a este país y la otra mitad está concentrada entre España y Alemania.")
 
